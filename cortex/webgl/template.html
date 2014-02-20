@@ -4,39 +4,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<link rel="stylesheet" href="resources/css/ui-lightness/jquery-ui-1.8.21.custom.css" type='text/css' />
-<link rel="stylesheet" href="resources/css/jquery.miniColors.css" type='text/css' />
-<link rel="stylesheet" href="resources/css/w2ui-1.2.min.css" type='text/css' />
+<link rel="stylesheet" href="/static/pycortex-resources/css/ui-lightness/jquery-ui-1.8.21.custom.css" type='text/css' />
+<link rel="stylesheet" href="/static/pycortex-resources/css/jquery.miniColors.css" type='text/css' />
+<link rel="stylesheet" href="/static/pycortex-resources/css/w2ui-1.2.min.css" type='text/css' />
 
-<script type='text/javascript' src='resources/js/jquery-1.8.0.min.js'></script>
-<script type='text/javascript' src='resources/js/jquery-ui-1.8.23.custom.min.js'></script>
-<script type='text/javascript' src='resources/js/jquery.ddslick.min.js'></script>
-<script type='text/javascript' src='resources/js/jquery.miniColors.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/jquery-1.8.0.min.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/jquery-ui-1.8.23.custom.min.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/jquery.ddslick.min.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/jquery.miniColors.js'></script>
 
-<script type='text/javascript' src="resources/js/Three.js"></script>
-<script type='text/javascript' src="resources/js/ctm/lzma.js"></script>
-<script type='text/javascript' src="resources/js/ctm/ctm.js"></script>
-<script type='text/javascript' src="resources/js/ctm/CTMLoader.js"></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/Three.js"></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/ctm/lzma.js"></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/ctm/ctm.js"></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/ctm/CTMLoader.js"></script>
 
-<script type="text/javascript" src="resources/js/rgbcolor.js"></script> 
-<script type="text/javascript" src="resources/js/canvg.js"></script> 
+<script type="text/javascript" src="/static/pycortex-resources/js/rgbcolor.js"></script> 
+<script type="text/javascript" src="/static/pycortex-resources/js/canvg.js"></script> 
 
-<script type='text/javascript' src='resources/js/datamodel.js'></script>
-<script type='text/javascript' src='resources/js/dataset.js'></script>
-<script type='text/javascript' src='resources/js/sliceplane.js'></script>
-<script type='text/javascript' src='resources/js/svgroi.js'></script>
-<script type='text/javascript' src='resources/js/shadowtex.js'></script>
-<script type='text/javascript' src='resources/js/shaderlib.js'></script>
-<script type='text/javascript' src="resources/js/LandscapeControls.js"></script>
-<script type='text/javascript' src="resources/js/kdTree-min.js"></script>
-<script type='text/javascript' src='resources/js/facepick.js'></script>
-<script type='text/javascript' src='resources/js/w2ui-1.2.min.js'></script>
-<script type='text/javascript' src='resources/js/figure.js'></script>
-<script type='text/javascript' src='resources/js/mriview_utils.js'></script>
-<script type='text/javascript' src='resources/js/mriview.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/datamodel.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/dataset.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/sliceplane.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/svgroi.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/shadowtex.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/shaderlib.js'></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/LandscapeControls.js"></script>
+<script type='text/javascript' src="/static/pycortex-resources/js/kdTree-min.js"></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/facepick.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/w2ui-1.2.min.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/figure.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/mriview_utils.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/mriview.js'></script>
 
 {% if python_interface %}
-<script type='text/javascript' src='resources/js/python_interface.js'></script>
+<script type='text/javascript' src='/static/pycortex-resources/js/python_interface.js'></script>
 {% end %}
 {% block javascripts %}
 {% end %}
@@ -235,7 +235,7 @@
 	</div>
 </div>
 <div id='main'>
-	<div id='ctmload' class='loadmsg'><img src='resources/images/loading.gif'>Loading brain...</div>
+	<div id='ctmload' class='loadmsg'><img src='/static/pycortex-resources/images/loading.gif'>Loading brain...</div>
 	<div id='dataname'></div>
 	<div id='braincover'></div>
 	<canvas id='brain'></canvas>
@@ -247,7 +247,7 @@
 				<tr>
 					<td><input type='text' id='movieframe' /></td>
 					<td id='movieprogress'><div></div></td>
-					<td id='moviecontrol'><img src='resources/images/control-play.png' /></td>
+					<td id='moviecontrol'><img src='/static/pycortex-resources/images/control-play.png' /></td>
 				</tr>
 			</table>
 		</div>
@@ -275,7 +275,7 @@
 	<div class='movie_wrapper'>
         <div class='movie_cell'>
             <div class='movie_load loadmsg'>
-                <img src='resources/images/loading.gif'>
+                <img src='/static/pycortex-resources/images/loading.gif'>
                 Loading...
             </div>
             <video class='movie' preload loop='loop'>
@@ -285,8 +285,8 @@
     </div>
 </script>
 
-<link rel="stylesheet" href="resources/css/jsplot.css" type='text/css' />
-<link rel="stylesheet" href="resources/css/mriview.css" type='text/css' />
+<link rel="stylesheet" href="/static/pycortex-resources/css/jsplot.css" type='text/css' />
+<link rel="stylesheet" href="/static/pycortex-resources/css/mriview.css" type='text/css' />
 <script type='text/javascript'>
 	var validator = new function() {
 		var gl;
@@ -336,7 +336,7 @@
 
 </head>
 <body>
-<div id='dataload' class='loadmsg'><img src='resources/images/loading.gif'>Loading data...</div>
+<div id='dataload' class='loadmsg'><img src='/static/pycortex-resources/images/loading.gif'>Loading data...</div>
 {% block extrahtml %}
 {% end %}
 

@@ -102,8 +102,7 @@ def make_static(outpath, data, types=("inflated",), recache=False, cmap="RdBu_r"
             if os.path.exists(newfile):
                 os.unlink(newfile)
             
-            if os.path.exists(srcfile):
-                shutil.copy2(srcfile, newfile)
+            os.symlink(os.path.join(oldpath, "%s.%s"%(fname, ext)), newfile)
 
             if ext == "json" and anonymize:
                 ## change filenames in json
@@ -158,7 +157,12 @@ def make_static(outpath, data, types=("inflated",), recache=False, cmap="RdBu_r"
         layout=layout,
         subjects=json.dumps(ctms),
         **kwargs)
-    htmlembed.embed(html, os.path.join(outpath, "index.html"), rootdirs)
+    
+    with open(os.path.join(outpath, "index.html"), "w") as htmlfile:
+        htmlfile.write(html)
+        
+#    htmlembed.embed(html, os.path.join(outpath, "index.html"), rootdirs)
+    db.auxfile = None
 
 def show(data, types=("inflated",), recache=False, cmap='RdBu_r', layout=None, autoclose=True, open_browser=True, port=None, pickerfun=None, **kwargs):
     """Display a dynamic viewer using the given dataset

@@ -7,6 +7,7 @@ dict(
     images=(__braindata_name=["img1.png", "img2.png"]),
 )
 """
+import os
 import json
 import numpy as np
 
@@ -17,20 +18,20 @@ class Package(object):
     """Package the data into a form usable by javascript"""
     def __init__(self, data):
         self.dataset = dataset.normalize(data)
-        self.uniques = data.uniques()
+        self.uniques = data.uniques(collapse=True)
         
         self.brains = dict()
         self.images = dict()
         for brain in self.uniques:
             name = brain.name
-            self.brains[name] = brain.to_json()
+            self.brains[name] = brain.to_json(simple=True)
             voldata = brain.volume
-            if not brain.movie:
-                voldata = voldata[np.newaxis]
-            if brain.raw:
+            if isinstance(brain, (dataset.VolumeRGB, dataset.VertexRGB)):
                 voldata = voldata.astype(np.uint8)
+                self.brains[name]['raw'] = True
             else:
                 voldata = voldata.astype(np.float32)
+                self.brains[name]['raw'] = False
             self.images[name] = [volume.mosaic(vol, show=False) for vol in voldata]
             if len(set([shape for m, shape in self.images[name]])) != 1:
                 raise ValueError('Internal error in mosaic')
@@ -41,8 +42,10 @@ class Package(object):
     def views(self):
         metadata = []
         for name, view in self.dataset:
-            meta = view.to_json()
+            meta = view.to_json(simple=False)
             meta['name'] = name
+            if 'stim' in meta['attrs']:
+                meta['attrs']['stim'] = os.path.split(meta['attrs']['stim'])[1] 
             metadata.append(meta)
         return metadata
 

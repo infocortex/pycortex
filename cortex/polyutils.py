@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import numpy as np
-from scipy.spatial import distance, Delaunay, cKDTree
+from scipy.spatial import distance, Delaunay
 from scipy import sparse
 import scipy.sparse.linalg
 import functools
@@ -12,7 +12,7 @@ def _memo(fn):
     dozens of times.
     """
     @functools.wraps(fn)
-    def memofn(self):
+    def memofn(self, *args, **kwargs):
         if id(fn) not in self._cache:
             self._cache[id(fn)] = fn(self)
         return self._cache[id(fn)]
@@ -36,7 +36,7 @@ class Surface(object):
         polys : 2D ndarray, shape (total_polys, 3)
             Indices of the vertices in each triangle in the surface.
         """
-        self.pts = pts
+        self.pts = pts.astype(np.double)
         self.polys = polys
 
         self._cache = dict()
@@ -74,7 +74,8 @@ class Surface(object):
                                   (self.polys[:,0], self.polys[:,2])), (npt,npt))
         adj3 = sparse.coo_matrix((np.ones((npoly,)),
                                   (self.polys[:,1], self.polys[:,2])), (npt,npt))
-        return (adj1 + adj2 + adj3).tocsr()
+        alladj = (adj1 + adj2 + adj3).tocsr()
+        return alladj + alladj.T
     
     @property
     @_memo
@@ -108,7 +109,7 @@ class Surface(object):
         nnfnorms = np.cross(self.ppts[:,1] - self.ppts[:,0], 
                             self.ppts[:,2] - self.ppts[:,0])
         # Compute vector length
-        return np.sqrt((nnfnorms**2).sum(-1))
+        return np.sqrt((nnfnorms**2).sum(-1)) / 2
 
     @property
     @_memo
@@ -196,7 +197,7 @@ class Surface(object):
         curv = (L.dot(self.pts) * self.vertex_normals).sum(1)
         return curv
 
-    def smooth(self, scalars, factor=1.0):
+    def smooth(self, scalars, factor=1.0, iterations=1):
         """Smooth vertex-wise function given by `scalars` across the surface using
         mean curvature flow method (see http://brickisland.net/cs177fa12/?p=302).
 
@@ -209,6 +210,8 @@ class Surface(object):
             supplied by mean_curvature.
         factor : float, optional
             Amount of smoothing to perform, larger values smooth more.
+        iterations : int, optional
+            Number of times to repeat smoothing, larger values smooths more.
 
         Returns
         -------
@@ -223,9 +226,12 @@ class Surface(object):
         lfac = sparse.dia_matrix((D,[0]), (npt,npt)) - factor * (W-V)
         goodrows = np.nonzero(~np.array(lfac.sum(0) == 0).ravel())[0]
         lfac_solver = sparse.linalg.dsolve.factorized(lfac[goodrows][:,goodrows])
-        goodsmscalars = lfac_solver((D * scalars)[goodrows])
+        to_smooth = scalars
+        for _ in range(iterations):
+            from_smooth = lfac_solver((D * to_smooth)[goodrows])
+            to_smooth[goodrows] = from_smooth
         smscalars = np.zeros(scalars.shape)
-        smscalars[goodrows] = goodsmscalars
+        smscalars[goodrows] = from_smooth
         return smscalars
         
     @property
@@ -260,7 +266,6 @@ class Surface(object):
         pu = scalars[self.polys]
         fe12, fe23, fe31 = [f.T for f in self._facenorm_cross_edge]
         pu1, pu2, pu3 = pu.T
-        fa = self.face_areas
 
         # numexpr is much faster than doing this using numpy!
         #gradu = ((fe12.T * pu[:,2] +
@@ -383,7 +388,7 @@ class Surface(object):
 
         Using this function directly is unnecessarily expensive if you want to interpolate
         many different values between the same knot points. Instead, you should directly
-        create and interpolator function using _create_interp, and then call that function.
+        create an interpolator function using _create_interp, and then call that function.
         In fact, that's exactly what this function does.
 
         See _create_biharmonic_solver for math details.
@@ -412,7 +417,7 @@ class Surface(object):
         fe31 = np.cross(fnorms, ppts[:,0] - ppts[:,2])
         return fe12, fe23, fe31
 
-    def geodesic_distance(self, verts, m=2.0, fem=False):
+    def geodesic_distance(self, verts, m=1.0, fem=False):
         """Minimum mesh geodesic distance (in mm) from each vertex in surface to any
         vertex in the collection `verts`.
 
@@ -482,7 +487,6 @@ class Surface(object):
         X = np.nan_to_num(ne.evaluate("-graduT / sqrt(gusum)").T)
 
         # Compute integrated divergence of X at each vertex
-        ppts = self.ppts
         #x1 = x2 = x3 = np.zeros((X.shape[0],))
         c32, c13, c21 = self._cot_edge
         x1 = 0.5 * (c32 * X).sum(1)
@@ -919,7 +923,6 @@ def rasterize(poly, shape=(256, 256)):
 
 def voxelize(pts, polys, shape=(256, 256, 256), center=(128, 128, 128), mp=True):
     from tvtk.api import tvtk
-    from PIL import Image, ImageDraw
     
     pd = tvtk.PolyData(points=pts + center + (0, 0, 0), polys=polys)
     plane = tvtk.Planes(normals=[(0,0,1)], points=[(0,0,0)])
@@ -955,3 +958,24 @@ def measure_volume(pts, polys):
     pd = tvtk.PolyData(points=pts, polys=polys)
     mp = tvtk.MassProperties(input=pd)
     return mp.volume
+
+def marching_cubes(volume, smooth=True, decimate=True, **kwargs):
+    import tvtk
+    imgdata = tvtk.ImageData(dimensions=volume.shape)
+    imgdata.point_data.scalars = volume.flatten('F')
+
+    contours = tvtk.ContourFilter(input=imgdata, number_of_contours=1)
+    contours.set_value(0, 1)
+
+    if smooth:
+        smoothargs = dict(number_of_iterations=40, feature_angle = 90, pass_band=.05)
+        smoothargs.update(kwargs)
+        contours = tvtk.WindowedSincPolyDataFilter(input=contours.output, **smoothargs)
+    if decimate:
+        contours = tvtk.QuadricDecimation(input=contours.output, target_reduction=.75)
+    
+    contours.update()
+    pts = contours.output.points.to_array()
+    polys = contours.output.polys.to_array().reshape(-1, 4)[:,1:]
+    return pts, polys
+
